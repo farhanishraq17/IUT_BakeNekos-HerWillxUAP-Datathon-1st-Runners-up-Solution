@@ -1,0 +1,12 @@
+{
+ "dataset": "https://www.kaggle.com/datasets/farhanishraqq/herwill-g31-gemma4-31b-qlora-seed42",
+ "path": "fold3/",
+ "files": {
+  "README.md": 5190,
+  "adapter_model.safetensors": 489840816,
+  "adapter_config.json": 1068,
+  "tokenizer_config.json": 1527,
+  "tokenizer.json": 32170168,
+  "run_config.json": 746
+ }
+}

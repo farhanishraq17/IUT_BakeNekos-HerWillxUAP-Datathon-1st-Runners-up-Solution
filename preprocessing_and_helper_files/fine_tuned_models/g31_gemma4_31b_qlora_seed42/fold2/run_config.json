@@ -1,0 +1,39 @@
+{
+ "base": "google/gemma-4-31B",
+ "mode": "labeltok",
+ "head": "default",
+ "max_len": 128,
+ "quant": "nf4",
+ "seed": 44,
+ "fold": 2,
+ "pseudo": "none",
+ "prompt_prefix": "Classify this social-media post (Bangla, English or Banglish). 0 = explicitly toxic or hateful, 1 = subtly toxic (sarcasm, coded language), 2 = non-toxic or neutral.\nPost: ",
+ "prompt_suffix": "\nLabel:",
+ "label_token_ids": [
+  236771,
+  236770,
+  236778
+ ],
+ "label_order": [
+  0,
+  1,
+  2
+ ],
+ "padding_side": "left",
+ "clean": "common.clean (Instructions 3.1)",
+ "post_truncation_tokens": 128,
+ "lora": {
+  "r": 16,
+  "alpha": 32,
+  "dropout": 0.05,
+  "targets": [
+   "q_proj",
+   "k_proj",
+   "v_proj",
+   "o_proj",
+   "gate_proj",
+   "up_proj",
+   "down_proj"
+  ]
+ }
+}

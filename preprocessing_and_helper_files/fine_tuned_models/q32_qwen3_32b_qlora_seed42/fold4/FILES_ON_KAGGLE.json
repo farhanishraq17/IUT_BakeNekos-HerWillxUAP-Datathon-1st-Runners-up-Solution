@@ -1,0 +1,13 @@
+{
+ "dataset": "https://www.kaggle.com/datasets/farhanishraqq/herwill-q32-qwen3-32b-qlora-seed42",
+ "path": "fold4/",
+ "files": {
+  "README.md": 5152,
+  "adapter_model.safetensors": 537053528,
+  "adapter_config.json": 1122,
+  "chat_template.jinja": 4168,
+  "tokenizer_config.json": 693,
+  "tokenizer.json": 11422748,
+  "run_config.json": 535
+ }
+}

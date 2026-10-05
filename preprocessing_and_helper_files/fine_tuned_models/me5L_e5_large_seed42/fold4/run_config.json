@@ -1,0 +1,28 @@
+{
+ "base": "intfloat/multilingual-e5-large",
+ "fold": 4,
+ "seed": 46,
+ "max_len": 128,
+ "ctx": false,
+ "label_order": [
+  0,
+  1,
+  2
+ ],
+ "clean": "common.clean",
+ "hparams": {
+  "model": "intfloat/multilingual-e5-large",
+  "tag": "me5Lw",
+  "fold": 4,
+  "lr": 1e-05,
+  "bs": 16,
+  "epochs": 3.0,
+  "maxlen": 128,
+  "seed": 42,
+  "normalize": false,
+  "limit": 0,
+  "pseudo": "none",
+  "save": true,
+  "ctx": false
+ }
+}

@@ -1,0 +1,35 @@
+{
+ "base": "Qwen/Qwen3-32B",
+ "mode": "seqcls",
+ "head": "default",
+ "max_len": 192,
+ "quant": "nf4",
+ "seed": 45,
+ "fold": 3,
+ "pseudo": "none",
+ "prompt_prefix": null,
+ "prompt_suffix": null,
+ "label_token_ids": null,
+ "label_order": [
+  0,
+  1,
+  2
+ ],
+ "padding_side": "right",
+ "clean": "common.clean (Instructions 3.1)",
+ "post_truncation_tokens": 192,
+ "lora": {
+  "r": 16,
+  "alpha": 32,
+  "dropout": 0.05,
+  "targets": [
+   "q_proj",
+   "k_proj",
+   "v_proj",
+   "o_proj",
+   "gate_proj",
+   "up_proj",
+   "down_proj"
+  ]
+ }
+}

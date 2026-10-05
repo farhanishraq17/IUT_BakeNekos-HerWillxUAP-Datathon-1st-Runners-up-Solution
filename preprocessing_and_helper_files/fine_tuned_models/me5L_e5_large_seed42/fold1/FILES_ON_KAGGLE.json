@@ -1,0 +1,11 @@
+{
+ "dataset": "https://www.kaggle.com/datasets/farhanishraqq/herwill-e5-large-finetuned-seed42",
+ "path": "fold1/",
+ "files": {
+  "config.json": 917,
+  "model.safetensors": 2239622772,
+  "tokenizer_config.json": 382,
+  "tokenizer.json": 17082832,
+  "run_config.json": 420
+ }
+}

@@ -1,0 +1,13 @@
+# Fine-tuning notebooks (GPU) and predict_from_weights.py. Tested with Python 3.11, CUDA GPUs >= 24 GB.
+torch==2.12.1
+transformers==5.6.0
+peft==0.19.1
+bitsandbytes==0.50.1
+accelerate==1.11.0
+datasets==4.0.0
+tokenizers==0.22.2
+numpy==2.4.6
+pandas==2.3.3
+scipy==1.17.1
+scikit-learn==1.9.1
+matplotlib==3.11.0
