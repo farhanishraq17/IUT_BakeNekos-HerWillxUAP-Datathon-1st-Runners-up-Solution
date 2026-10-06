@@ -16,12 +16,11 @@
 [![e5-large](https://img.shields.io/badge/multilingual--e5-large-6C8EBF?style=flat-square)](https://huggingface.co/intfloat/multilingual-e5-large)
 [![Reproducible](https://img.shields.io/badge/reproduction-byte--identical-117A65?style=flat-square)](#8-reproducing-the-results)
 
-**Md. Farhan Ishraq**¹ · **Didhiti Nahid**¹ · **Tamim Muhammad Rayeed**² 
+**Md. Farhan Ishraq**¹ · **Didhiti Nahid**¹ · **Tamim Muhammad Rayeed**²
 
 <sub>¹ Islamic University of Technology &nbsp;·&nbsp; ² University of Dhaka<br>
-Kaggle community competition <a href="https://www.kaggle.com/competitions/
- · 27–28 September 2026 · 25 hours from brief to deadline</sub>
-
+Kaggle community competition · [HerWILL Safe Social Media Datathon 2026](https://www.kaggle.com/competitions/HerWILL-Safe-Social-Media-Datathon-2026)
+· 27–28 September 2026 · 25 hours from brief to deadline</sub>
 <br>
 
 <img src="report/figures/pipeline_overview.png" alt="IUT BakeNekos pipeline: four fine-tuned text models, leakage-safe meta features, a gradient-boosting stacker and per-class calibration" width="900">
