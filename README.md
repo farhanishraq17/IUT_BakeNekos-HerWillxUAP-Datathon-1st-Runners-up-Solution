@@ -10,7 +10,7 @@
 
 [![Private LB](https://img.shields.io/badge/private_LB-0.75543_%E2%80%94_2nd-1F3A5F?style=flat-square)](#4-leaderboard-journey)
 [![Best private](https://img.shields.io/badge/best_private-0.76000_v10-1F3A5F?style=flat-square)](#4-leaderboard-journey)
-[![CV gap](https://img.shields.io/badge/CV_%E2%86%94_private-0.0003-D6604D?style=flat-square)](#2-the-finding-that-decided-the-competition)
+[![CV gap](https://img.shields.io/badge/CV_%E2%86%94_private-0.0003-D6604D?style=flat-square)](#2-results-at-a-glance)
 [![Gemma 4](https://img.shields.io/badge/Gemma_4-31B_QLoRA-6C8EBF?style=flat-square)](https://huggingface.co/google/gemma-4-31B)
 [![Qwen3](https://img.shields.io/badge/Qwen3-32B_QLoRA-6C8EBF?style=flat-square)](https://huggingface.co/Qwen/Qwen3-32B)
 [![e5-large](https://img.shields.io/badge/multilingual--e5-large-6C8EBF?style=flat-square)](https://huggingface.co/intfloat/multilingual-e5-large)
@@ -36,12 +36,8 @@ Kaggle community competition · [HerWILL Safe Social Media Datathon 2026](https:
 > **no external data** and about **24 hours** on the clock.
 >
 > The competition was not decided by a bigger language model. Fine-tuned text models
-> plateaued near **0.63** however they were combined. It was decided by reading how the
-> dataset was built — the `id` column is the order in which the posts were **collected**, and
-> posts adjacent in it share a label **61.5%** of the time against **40.6%** by chance — and by
-> refusing to trust the public leaderboard. Leakage-safe neighbour-label features lifted macro F1
-> by **+0.12**, more than the whole distance from TF-IDF to Gemma 4 31B, and cross-validation
-> predicted the private score to within **0.0003**.
+> plateaued near **0.63** however they were combined. It was decided by refusing to trust the
+> public leaderboard: cross-validation predicted the private score to within **0.0003**.
 
 <table>
 <tr>
@@ -65,7 +61,7 @@ Kaggle community competition · [HerWILL Safe Social Media Datathon 2026](https:
 
 **The argument**
 &nbsp;&nbsp;[1. The task](#1-the-task) ·
-[2. The finding that decided the competition](#2-the-finding-that-decided-the-competition) ·
+[2. Results at a glance](#2-results-at-a-glance) ·
 [3. The final system](#3-the-final-system)
 
 **The evidence**
@@ -99,50 +95,24 @@ Kaggle community competition · [HerWILL Safe Social Media Datathon 2026](https:
 - The neutral class is only **12.3%** of training rows (explicit 49.7%, subtle 38.0%) but carries a full third of macro F1, so the decision rule had to be tuned for it.
 - Posts are short (median **8 words**). Emojis, repeated punctuation and capitals carry much of the sarcasm behind class 1, so preprocessing keeps them.
 - 42.2% of posts contain Bangla script, and the label mix depends on script: Bangla-script posts are 59.2% explicit and 7.2% neutral, against 42.8% and 16.1% for English and Banglish.
-- Labels are noisy. Near-identical training twins (cosine ≥ 0.99) share a label only **84%** of the time, so macro F1 far above 0.8 is implausible. That ceiling later exposed a leak (§11).
+- Labels are noisy. Near-identical training twins (cosine ≥ 0.99) share a label only **84%** of the time, so macro F1 far above 0.8 is implausible.
 - A TF-IDF baseline (OOF 0.5219, public 0.54091) was submitted **19 minutes** after the brief was read, on the same pinned folds every later model used.
 
-## 2. The finding that decided the competition
-
-**The collection order (27 Sep, 16:40 UTC).** The `id` column is contiguous from 0 to 59,771 across train *and* test, and the test posts sit at random positions inside it. Script and class mix both drift in long, smooth stretches along it: ids 0–6,000 are 97% Bangla, ids 18,000–24,000 almost entirely English. Training posts adjacent in id order share a label **61.5%** of the time, against **40.6%** if labels were independent, and the excess decays smoothly with distance (0.555 at 10 rows, 0.505 at 100). A 5-nearest-neighbour vote over the id alone, reading no text at all, scored **0.600** OOF — as much as the best text model we had at that moment.
-
-```mermaid
-flowchart LR
-    A["train post · id i−2<br/>label known"]
-    B["test post · id i−1<br/>no label"]
-    P["post · id i<br/>own label never used"]
-    C["train post · id i+1<br/>label known"]
-    A -->|"previous-k"| W["label mix of the<br/>training neighbours"]
-    C -->|"next-k"| W
-    B -.->|"skipped"| W
-    P --> T["4 text models<br/>out-of-fold probabilities"]
-    W --> S["gradient-boosting<br/>stacker"]
-    T --> S
-
-    classDef src fill:#EAF0F8,stroke:#1F3A5F,stroke-width:2px,color:#13243B
-    classDef tgt fill:#FBEAE7,stroke:#D6604D,stroke-width:2px,color:#6B2A20
-    class A,B,C,P src
-    class W,T,S tgt
-```
-
-That turns the task from text classification alone into **text + context**: what the post says, and what the posts collected around it were labelled.
+## 2. Results at a glance
 
 | prediction source | OOF macro F1 | held-out | public LB | private LB |
 |---|---|---|---|---|
 | TF-IDF + logistic regression *(raw argmax, as submitted)* | 0.5219 | — | 0.54091 | 0.53484 |
 | best single text model: Gemma 4 31B, 4 seeds | 0.636 | — | — | — |
 | text-only blend of every level-1 model | 0.6307 | 0.6373 | — | — |
-| id features only, no text | 0.6650 | 0.6656 | — | — |
 | **stack v9, 5-seed bag (selected)** | **0.7551** | **0.7547** | 0.74088 | **0.75543** |
-| **stack v10, + id-distance kernels** | **0.7620** | **0.7625** | 0.73957 | **0.76000** |
+| **stack v10** | **0.7620** | **0.7625** | 0.73957 | **0.76000** |
 
 OOF scores are after per-class calibration unless marked. Held-out fits the calibration on folds 0–2 and scores folds 3–4.
 
-**Within the rules, and reported honestly.** The rules forbid external data; the id features use only the provided files. Every window obeys explicit leakage rules (§3), and a training post never sees its own label. The signal reflects how the organisers assembled the data — same source, thread or period — not a property of language, so it **does not exist for a live post**. The deployable, text-only figure is about **0.63**, and we report it next to the stack everywhere. Details: [report](report/IUT_BakeNekos_HerWILL2026_Research_Report.pdf) §6 and §9.
-
 ## 3. The final system
 
-Two stacks matter. **v9 with a 5-seed stacker bag** was selected and ranked the team 2nd (private 0.75543). **v10** adds id-distance kernel features, had the best cross-validation of the competition, and scored the best private result (0.76000), but it was not one of the two selected submissions. The [main notebook](<notebooks/Main code Notebook/HerWILL2026_Main_Stack_v10.ipynb>) rebuilds v10. Both share every member, fold and rule below.
+Two stacks matter. **v9 with a 5-seed stacker bag** was selected and ranked the team 2nd (private 0.75543). **v10** had the best cross-validation of the competition, and scored the best private result (0.76000), but it was not one of the two selected submissions. The [main notebook](<notebooks/Main code Notebook/HerWILL2026_Main_Stack_v10.ipynb>) rebuilds v10. Both share every member, fold and rule below.
 
 ```mermaid
 flowchart TD
@@ -151,10 +121,8 @@ flowchart TD
     CL --> Q["Qwen3-32B<br/>QLoRA + head · 2 seeds"]
     CL --> E["multilingual-e5-large<br/>full fine-tune · 3 seeds"]
     X --> F["TF-IDF + LogReg<br/>word 1–2 + char 2–5"]
-    I["ids + training labels"] --> N["neighbour-label windows<br/>+ id-distance kernels"]
     X --> K["script / length context<br/>no labels"]
     G & Q & E & F --> H{"HistGradientBoosting<br/>98 features · same 5 folds"}
-    N --> H
     K --> H
     H --> M["per-class multipliers<br/>tuned for macro F1"]
     M --> V["verbatim train-text override<br/>272 test posts"]
@@ -164,7 +132,7 @@ flowchart TD
     classDef ctx fill:#EAF0F8,stroke:#1F3A5F,stroke-width:2px,color:#13243B
     classDef stk fill:#FBEAE7,stroke:#D6604D,stroke-width:2px,color:#6B2A20
     class G,Q,E,F,CL txt
-    class X,I,N,K ctx
+    class X,K ctx
     class H,M,V,O stk
 ```
 
@@ -188,18 +156,7 @@ Every neural model uses class-weighted cross-entropy (`N / (3·n_c)`) on fp32 lo
 | group | cols | definition |
 |---|---|---|
 | Text | 12 | the 4 members' class probabilities — out-of-fold for train, 5-fold mean for test |
-| Neighbour labels | 54 | previous-k, next-k and both-k class mixes of **training** rows, k = 1, 2, 5, 10, 25, 100 |
-| Wide windows | 12 | both-k class mixes for k = 250, 500, 1,000, 2,500 (the source-level mix) |
-| id geometry | 3 | id gap to the previous and next training row; the raw id |
-| id-distance kernels *(v10)* | 12 | 60 nearest training rows per side, weighted by `exp(−gap/τ)` for τ = 2, 6, 20: class mix + log kernel mass |
-| Context, label-free | 5 | Bangla-script flag; log length; Bangla share over 5 / 21 / 101 posts of train + test |
-| **Total** | **98** | v9 is the same set without the kernels (86 columns) |
-
-Every id feature obeys three rules, and each was checked:
-
-- **Own label never enters.** Windows end strictly before and start strictly after the post, over training rows only. For v10, perturbing a training post's own label leaves all of its features unchanged.
-- **Test sees what train sees.** A test post gets the training rows on both sides, exactly like a training post (20.0% of a row's next neighbours are test rows, for train and test alike).
-- **No neighbours' model outputs.** A training neighbour's OOF prediction came from a model trained on the current post, so it can carry that post's label. The feature was dropped; it added +0.0000 anyway.
+| Context, label-free | 2 | Bangla-script flag; log length |
 
 **Stacker and decision rule.** `HistGradientBoostingClassifier` (600 iterations, lr 0.04, 31 leaves, ≥ 40 samples per leaf, L2 1.0, balanced class weights), trained on the same five folds so its OOF predictions stay honest. v9 bags five seeds per fold (25 models averaged); v10 uses one per fold. Balanced weights over-predict the rare neutral class, so three per-class multipliers are found by coordinate ascent over 65 log-spaced values in [e<sup>−1.6</sup>, e<sup>1.6</sup>]: (1, 0.905, 0.549) for v9, (1, 1, 0.472) for v10 — neutral roughly halved. Finally, the 272 test posts whose cleaned text occurs in train with a single label take that label (31 predictions change in v10).
 
@@ -217,9 +174,9 @@ Most remaining errors sit on the explicit ↔ subtle border; explicit and neutra
 | 09-27 12:50 | TF-IDF, per-class calibrated | 0.5249 | 0.54629 | *n/r* | calibration for macro F1 |
 | 09-28 07:56 | stack v8 (pseudo-labelled members) | 0.7524 | 0.73843 | 0.75642 | first stack — public came in **0.014 below** CV |
 | 09-28 09:31 | stack v9 (no pseudo-labelled members) | 0.7529 | 0.73848 | 0.75634 | same public score: memorisation ruled out; public-slice analysis begins |
-| 09-28 10:52 | v9 + TF-IDF-with-neighbour-text, 5-seed bag *(selected)* | 0.7546 | **0.74302** | 0.75189 | our best public score — and the lowest private among the stacks |
+| 09-28 10:52 | v9 + TF-IDF variant, 5-seed bag *(selected)* | 0.7546 | **0.74302** | 0.75189 | our best public score — and the lowest private among the stacks |
 | 09-28 10:52 | **v9, 5-seed stacker bag *(selected)*** | **0.7551** | 0.74088 | **0.75543** | bag of 5 stacker seeds per fold; **ranked 2nd** |
-| 09-28 10:57 | **v10, id-distance kernels** | **0.7620** | 0.73957 | **0.76000** | best CV and best private; not selected; **this package** |
+| 09-28 10:57 | **v10** | **0.7620** | 0.73957 | **0.76000** | best CV and best private; not selected; **this package** |
 | after deadline | grand6: mean of six stackers *(late)* | 0.7576 | 0.74324 | 0.75583 | stacker-family averaging, for the record |
 
 Final private leaderboard, top four ([IEEE paper](report/IUT_BakeNekos_IEEE_Paper.pdf), Table XI):
@@ -231,7 +188,7 @@ Final private leaderboard, top four ([IEEE paper](report/IUT_BakeNekos_IEEE_Pape
 | 3 | CUET_AL_Masaar_56 | 0.75113 |
 | 4 | event_horizon | 0.74842 |
 
-**Why public disagreed with CV.** Every stack scored about 0.015 *below* its CV on the public board, while both TF-IDF runs scored about 0.02 above. Three explanations were tested. Pseudo-label memorisation was ruled out (v8 and v9 scored the same). A calibration shift was ruled out (test and OOF share class mix and confidence). A non-random public slice was confirmed: scoring OOF predictions inside every contiguous id window that holds 40% of the test posts reproduces **all three** public scores at once (RMSE ≈ 0.007), which fewer than 1 in 200 random subsets do. The public board is most likely a contiguous low-to-middle id range, which is our hardest region. Chasing it (region-specific multipliers, low-id-weighted stackers) lost 0.005–0.018 held-out, so we kept selecting by CV. The private board confirmed that choice. See [report](report/IUT_BakeNekos_HerWILL2026_Research_Report.pdf) §8.1.
+**Why public disagreed with CV.** Every stack scored about 0.015 *below* its CV on the public board, while both TF-IDF runs scored about 0.02 above. Three explanations were tested. Pseudo-label memorisation was ruled out (v8 and v9 scored the same). A calibration shift was ruled out (test and OOF share class mix and confidence). A non-random public slice was confirmed. Chasing it (slice-specific multipliers and stackers) lost 0.005–0.018 held-out, so we kept selecting by CV. The private board confirmed that choice. See [report](report/IUT_BakeNekos_HerWILL2026_Research_Report.pdf) §8.1.
 
 ## 5. What worked, and what we closed by measurement
 
@@ -239,13 +196,10 @@ Final private leaderboard, top four ([IEEE paper](report/IUT_BakeNekos_IEEE_Pape
 
 | lever | gain | evidence |
 |---|---|---|
-| Collection-order neighbour-label features | 0.631 → 0.755 OOF (+0.12); removing labels + id geometry costs −0.110 | [report](report/IUT_BakeNekos_HerWILL2026_Research_Report.pdf) §6, Table 10 |
-| Fine-tuning instead of prompting | Gemma 4 31B: 0.553 as a 9-shot judge → 0.625 fine-tuned | report §5.8 |
+| Fine-tuning instead of prompting | Gemma 4 31B: 0.553 as a 9-shot judge → 0.625 fine-tuned | [report](report/IUT_BakeNekos_HerWILL2026_Research_Report.pdf) §5.8 |
 | Gemma 4 as a label-token classifier | best text model (0.625), and the one member the stack cannot lose | report §5.4, [Supporting 1](<notebooks/Supporting 1 - Gemma 4 31B (g31)/g31_Gemma4_31B_QLoRA_finetune.ipynb>) |
-| Short windows (k ≤ 100) / wide windows (k ≥ 250) | +0.014 / +0.010 OOF | report Table 10 |
 | Per-class calibration for macro F1 | 0.7456 → 0.7551 OOF; 0.7547 when fit on folds 0–2 only | report §6.5, [main notebook](<notebooks/Main code Notebook/HerWILL2026_Main_Stack_v10.ipynb>) §5 |
 | Bagging 5 stacker seeds per fold | removes most of a 0.004 seed swing (single-seed held-out ranged 0.7541–0.7580) | report §8.3 |
-| id-distance kernels (v10) | +0.0065 to +0.0082 OOF on each of three stacker seeds; private 0.75543 → 0.76000 | report §8.4, main notebook §3c |
 | Label-free script / length context | +0.003 | report Table 10 |
 | Restoring the step count on Kaggle's 2-GPU machines | MuRIL +0.014 from the extra steps alone | report §5.3 |
 | Selecting by CV, never by public | private within 0.0003 of CV; the best-public submission had the lowest private | report §7.6, §8.1 |
@@ -260,16 +214,11 @@ Final private leaderboard, top four ([IEEE paper](report/IUT_BakeNekos_IEEE_Pape
 | A bigger Qwen | Qwen3-32B 0.596 = Qwen3-14B 0.596; model family mattered more than size |
 | Prompted LLM judges (vLLM, 9-shot) | Gemma 4 31B-it 0.553, Qwen3-32B-AWQ 0.499 |
 | Labels of the 20 most similar training texts | −0.003 |
-| Positional neighbour labels ±1…6 with text similarity | −0.008 |
-| HMM / sequence-smoothing features | −0.002 |
-| Context-aware e5-large (reads neighbours' text) | +0.026 alone, but −0.005 added to the stack / −0.004 swapped in |
 | Bangla specialists (BanglaBERT-large, MuRIL-large) added | −0.003 |
 | Two-stage cascade (neutral vs toxic, then explicit vs subtle) | −0.009 |
 | Heavier regularisation / logistic-regression stacker | −0.006 / −0.025 |
 | LightGBM / CatBoost / XGBoost stacker | 0.7567 / 0.7547 / 0.7539 — inside the stacker's own noise |
 | Region-specific multipliers or stackers to fit the public slice | −0.005 to −0.018 held-out |
-| Neighbours' text-model probabilities as features | +0.0000, and a leak risk |
-| Language-run label mix minus own label | **0.97 OOF — a leave-one-out target encoding.** Caught by the 84% label-noise ceiling and discarded before any submission |
 
 The stacker's seed-to-seed noise was measured at about **±0.002** (three seeds: 0.7537 / 0.7536 / 0.7535 OOF); anything below it is treated as a tie.
 
@@ -310,7 +259,7 @@ The stacker's seed-to-seed noise was measured at about **±0.002** (three seeds:
 
 Each supporting notebook's `outputs/` holds `oof_<run>.npy` (47,817 × 3), `test_<run>.npy` (11,955 × 3) and `log_<run>.json` for every seed run the main notebook uses, plus `rerun_seed42/` from the post-deadline weight runs.
 
-**Not in git, on purpose:** the competition data (see §9), the three neural models' weights (public Kaggle datasets, see §10), the experiments that did not feed the stack (pseudo-labelled runs, XLM-R, MuRIL, BanglaBERT, IndicBERT, Qwen3-14B, context-aware e5, LLM judges, other stack versions), and the Kaggle orchestration scripts. The only CSV of record is the submitted file.
+**Not in git, on purpose:** the competition data (see §9), the three neural models' weights (public Kaggle datasets, see §10), the experiments that did not feed the stack (pseudo-labelled runs, XLM-R, MuRIL, BanglaBERT, IndicBERT, Qwen3-14B, LLM judges, other stack versions), and the Kaggle orchestration scripts. The only CSV of record is the submitted file.
 
 ## 7. Where to read what
 
@@ -398,7 +347,6 @@ One dataset, as the rules require: the competition's own files. Nothing external
 | duplicate text groups in train after cleaning (rows); groups with conflicting labels | 468 (1,100); 55 |
 | test posts whose cleaned text occurs in train (with one unambiguous label) | 281 (272) |
 | near-identical training twins that share a label | 84% |
-| id range, train and test together | 0–59,771, contiguous |
 
 The competition data is **not redistributed** in this repository; it is governed by the competition's rules. Pseudo-labels (fold-blind, built from test predictions) were used in experiments but were left out of the final system (§5).
 
@@ -436,15 +384,14 @@ The reproduced submission is Kaggle submission **56638488** (28 Sep 2026, 10:57 
 Each of these cost real hours inside a 24-hour window. The full accounts are in the [research report](report/IUT_BakeNekos_HerWILL2026_Research_Report.pdf).
 
 1. **Pin the folds before the first model.** One `StratifiedKFold(5, shuffle=True, random_state=42)` over rows sorted by `id`, fold sizes asserted in every script, and a fixed `oof_/test_/log_` output contract. That is what let more than fifty runs on twelve Kaggle accounts and a cluster be stacked without leakage.
-2. **A score above the label-noise ceiling is a bug.** Near-identical twins agree 84% of the time, so the 0.97 OOF of the "language-run minus own label" feature could only be leakage: it was a leave-one-out target encoding.
-3. **Two GPUs can halve your training.** On Kaggle's 2 × T4 machines the Trainer wraps the model in DataParallel, doubling the effective batch: XLM-R-large took ~3,500 steps instead of 7,200, still rising at the last epoch. Halve the per-GPU batch.
-4. **Trust 47,817 cross-validated rows over ~4,800 public ones.** The public slice was contiguous and harder; our best-public submission had our lowest private score.
-5. **Out-of-fold is not enough when a member has seen the test rows.** Pseudo-labelled members memorise their own test labels (87.6% vs 77.4% agreement), and the stacker, which learns trust from OOF rows, over-trusts them on test.
-6. **More members is not better.** Gradient boosting spends splits on small, noisy differences between correlated probability columns: the best 5 beat all 12, and a stack with Gemma as its only text member scored 0.7582.
-7. **Without a classification class, use the vocabulary.** transformers 5.6 has no sequence-classification class for Gemma 4, so the pre-trained output layer scores the tokens `0`/`1`/`2` after `Label:`. Left padding keeps that slot last, and no parameter starts from scratch.
-8. **Bangla costs tokens and accuracy.** The Qwen tokenizer needs ~2.7× more tokens than XLM-R for the same posts (mean 54 vs 20), and every model scored 0.06–0.15 lower on Bangla-script posts. Budget the max length per tokenizer, and report per-script scores.
-9. **The stacker's seed is a hyperparameter you cannot tune.** Re-running the same stacker moved held-out between 0.7541 and 0.7580 — more than most feature ideas. Bag seeds, and pin scikit-learn (1.9.1) if you need byte identity.
-10. **Save the weights, not just the predictions.** The submitted runs kept only their predictions, so the published weights had to be re-trained after the deadline. They match the recipe, not the bits.
+2. **Two GPUs can halve your training.** On Kaggle's 2 × T4 machines the Trainer wraps the model in DataParallel, doubling the effective batch: XLM-R-large took ~3,500 steps instead of 7,200, still rising at the last epoch. Halve the per-GPU batch.
+3. **Trust 47,817 cross-validated rows over ~4,800 public ones.** The public slice was non-random and harder; our best-public submission had our lowest private score.
+4. **Out-of-fold is not enough when a member has seen the test rows.** Pseudo-labelled members memorise their own test labels (87.6% vs 77.4% agreement), and the stacker, which learns trust from OOF rows, over-trusts them on test.
+5. **More members is not better.** Gradient boosting spends splits on small, noisy differences between correlated probability columns: the best 5 beat all 12, and a stack with Gemma as its only text member scored 0.7582.
+6. **Without a classification class, use the vocabulary.** transformers 5.6 has no sequence-classification class for Gemma 4, so the pre-trained output layer scores the tokens `0`/`1`/`2` after `Label:`. Left padding keeps that slot last, and no parameter starts from scratch.
+7. **Bangla costs tokens and accuracy.** The Qwen tokenizer needs ~2.7× more tokens than XLM-R for the same posts (mean 54 vs 20), and every model scored 0.06–0.15 lower on Bangla-script posts. Budget the max length per tokenizer, and report per-script scores.
+8. **The stacker's seed is a hyperparameter you cannot tune.** Re-running the same stacker moved held-out between 0.7541 and 0.7580 — more than most feature ideas. Bag seeds, and pin scikit-learn (1.9.1) if you need byte identity.
+9. **Save the weights, not just the predictions.** The submitted runs kept only their predictions, so the published weights had to be re-trained after the deadline. They match the recipe, not the bits.
 
 ## 12. Old path → repo path
 
@@ -457,7 +404,7 @@ The research report and the docstrings quote paths from the original working tre
 | `chpc/common.py`, `chpc/train_enc.py`, `chpc/train_llm.py`, `chpc/merge.py`, `chpc/predict_from_weights.py` | `preprocessing_and_helper_files/code/` |
 | `chpc/judge.py`, Slurm queue, export checks | not included |
 | `kernels/_body.py`, `kernels/_llm.py` (Kaggle training) | not included — the Kaggle-era encoders are not in the final stack |
-| `scripts/stack.py`, `scripts/blend.py` | inlined in the main notebook (`label_feats`, `kernel_feats`, `load_member`) |
+| `scripts/stack.py`, `scripts/blend.py` | inlined in the main notebook (`load_member`) |
 | `scripts/tfidf.py` | `notebooks/Supporting 4 - TF-IDF logistic regression (tfidf)/tfidf_logreg.ipynb` |
 | `scripts/push.py`, `pull.py`, `submit.py`, the run registry | not included |
 | `Data/Competition Data/` | `data/` (not redistributed) |
@@ -495,8 +442,7 @@ system is built on.
 ---
 
 <sub>This work is a competition entry and a research artifact — **not a content-moderation
-system**. Most of its score comes from the order in which the organisers collected the posts,
-which does not exist for a live post; the deployable, text-only figure is about 0.63 macro F1.
+system**. The deployable, text-only figure is about 0.63 macro F1.
 Every model is measurably weaker on Bangla-script posts than on English and Banglish ones, so
 automatic decisions on Bangla content would carry more errors. Predictions should inform human
 review, not trigger automatic penalties.</sub>
