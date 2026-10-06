@@ -16,10 +16,11 @@
 [![e5-large](https://img.shields.io/badge/multilingual--e5-large-6C8EBF?style=flat-square)](https://huggingface.co/intfloat/multilingual-e5-large)
 [![Reproducible](https://img.shields.io/badge/reproduction-byte--identical-117A65?style=flat-square)](#8-reproducing-the-results)
 
-**Md. Farhan Ishraq** · **Didhiti Nahid** · **Tamim Muhammad Rayeed**
+**Md. Farhan Ishraq**¹ · **Didhiti Nahid**¹ · **Tamim Muhammad Rayeed**² 
 
-<sub>Islamic University of Technology (IUT), Gazipur, Bangladesh<br>
-Kaggle competition · 27–28 September 2026 · about 24 hours from brief to deadline</sub>
+<sub>¹ Islamic University of Technology &nbsp;·&nbsp; ² University of Dhaka<br>
+Kaggle community competition <a href="https://www.kaggle.com/competitions/
+ · 27–28 September 2026 · 25 hours from brief to deadline</sub>
 
 <br>
 
